@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div>
+        <h1>Character Mood Classifier</h1>
+    </div>
+    <div>
+        <form action={{ url_for('predict') }} method="POST" accept=".png,.jpg,.jpeg" enctype="multipart/form-data">
+            <label>Upload an image</label>
+            <input type="file" id="file" name="file">
+            <input type="submit" id="submit" name="submit_button" value="file_upload">
+        </form>
+    </div>
+    {% if image != '' and prediction != '' %}
+    <div>
+        <img src={{ url_for('static', filename='uploads/' + image) }} >
+        <div>
+            <h1 id="prediction">Prediction: {{ prediction }}</h1>
+            <img src={{ url_for('static', filename='moods/' + prediction + '.png') }} >
+        </div>
+    </div>
+    {% endif %}
+{% endblock %}
