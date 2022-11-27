@@ -31,7 +31,7 @@ import torchvision
 import torchvision.datasets as datasets # For importing dataset
 import torch.utils.data as data
 
-model = torch.jit.load('model_scripted_2.pt')
+model = torch.jit.load('model_scripted_3.pt')
 model.eval()
 
 from PIL import Image, ImageEnhance
