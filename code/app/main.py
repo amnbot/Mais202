@@ -69,7 +69,7 @@ def allowed_file(filename):
 # Predict route
 @app.route("/predict", methods=["POST"])
 def predict():
-    if request.method == "POST" and request.form['submit_button'] == 'file_upload':
+    if request.method == "POST" and request.form['submit_button'] == 'Upload':
         f = request.files['file']
         if f.filename == '':
             return 400

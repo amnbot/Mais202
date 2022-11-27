@@ -2,7 +2,7 @@
 <html>
     <head>
         <title class="app-name">Character Mood Classifier</title>
-        <link href="{{ url_for('static', filename='stylesheets/style.css') }}" rel='stylesheet'>
+        <link rel="stylesheet" href="{{url_for('static',filename='dist/css/output.css')}}">
         <link rel="preconnect" href="https://fonts.gstatic.com">
 <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,300;0,700;1,200;1,700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Paytone+One&display=swap" rel="stylesheet">
@@ -21,9 +21,11 @@
                 </strong>
             </div>
         </header> -->
-        <div class="container">
-            {% block content %}
-            {% endblock %}
+        <div class="flex min-h-screen justify-center items-center text-center text-default-text bg-background">
+            <div class="m-auto">
+                {% block content %}
+                {% endblock %}
+            </div>
         </div>
     </body>
 </html>
