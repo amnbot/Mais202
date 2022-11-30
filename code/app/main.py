@@ -1,6 +1,10 @@
 import os
-from flask import Flask, request, Response, render_template
+from flask import Flask, request, Response, render_template, redirect, url_for
 from flask_cors import CORS
+from flask_ngrok import run_with_ngrok
+from io import BytesIO
+import base64
+from binascii import a2b_base64
 from werkzeug.utils import secure_filename
 
 import torch
@@ -14,6 +18,7 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 app = Flask(__name__, template_folder='templates')
 CORS(app)
+run_with_ngrok(app)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 idx_to_label = [
@@ -34,7 +39,7 @@ import torch.utils.data as data
 model = torch.jit.load('model_scripted_3.pt')
 model.eval()
 
-from PIL import Image, ImageEnhance
+from PIL import Image, ImageEnhance, ImageGrab
 # transform class to make images sharper
 class Sharpie(object):
     def __init__(self,factor):
@@ -69,7 +74,7 @@ def allowed_file(filename):
 # Predict route
 @app.route("/predict", methods=["POST"])
 def predict():
-    if request.method == "POST" and request.form['submit_button'] == 'Upload':
+    if request.method == "POST":
         f = request.files['file']
         if f.filename == '':
             return 400
@@ -94,9 +99,40 @@ def predict():
 def home():
     return render_template('index.html', prediction="", image="")
 
+@app.route('/paint', methods=['GET', 'POST'])
+def paint():
+    if request.method == 'GET':
+        return render_template("paint.html", prediction="")
+    if request.method == 'POST':
+        filename = request.form['save_fname']
+        data = request.form['save_cdata']
+        canvas_image = request.form['save_image']
+        full_filename = os.path.join(app.config['UPLOAD_FOLDER'], filename).replace('\\', '/')
+        # print(filename)
+        # img = Image.open(BytesIO(base64.b64decode(canvas_image)))
+        # print(canvas_image)
+        params,data_img = canvas_image.split(',', 1)
+        params = params[5:]
+        params = params.split(';')
+        img_64 = base64.b64decode(data_img)
+        # with open('testfile2.png', 'wb') as fh:
+        #     fh.write(img_64)
+        img_file = BytesIO(img_64)
+        img = Image.open(img_file)
+        # canvas_image.save(full_filename)
+        input_tensor = preprocess(img)
+        input_batch = input_tensor.unsqueeze(0)
+        input_batch = input_batch.to(device)
+        with torch.no_grad():
+            output = model(input_batch)
+        prediction=idx_to_label[int(output[0].argmax())]
+        print(prediction)
+        return prediction
+        
+
 @app.route("/about")
 def about():
     return render_template('about.html')
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
